@@ -41,7 +41,6 @@ namespace PakMan
                 form.BackColor = ColorTranslator.FromHtml(backgraundColor);
                 form.Text = windowsName;
 
-
                 switch (windowFormBorderStyle)
                 {
                     case "FixedDialog":
