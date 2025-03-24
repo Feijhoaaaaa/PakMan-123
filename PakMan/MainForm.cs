@@ -62,18 +62,22 @@ namespace PakMan
             else if (e.KeyCode == Keys.Down)
             {
                 currentDirection = "down";
+                
             }
             else if (e.KeyCode == Keys.Up)
             {
                 currentDirection = "up";
+                
             }
             else if (e.KeyCode == Keys.Left)
             {
                 currentDirection = "left";
+                
             }
             else if (e.KeyCode == Keys.Right)
             {
                 currentDirection = "right";
+                
             }
         }
 
@@ -108,15 +112,19 @@ namespace PakMan
                 {
                     case "down":
                         _spritePlayer.PlayerMove(0,_spritePlayer.speed);
+                        RotatePacman(90);
                         break;
                     case "up":
                         _spritePlayer.PlayerMove(0,-_spritePlayer.speed);
+                        RotatePacman(270);
                         break;
                     case "left":
                         _spritePlayer.PlayerMove(-_spritePlayer.speed, 0);
+                        RotatePacman(180);
                         break;
                     case "right":
                         _spritePlayer.PlayerMove(_spritePlayer.speed, 0);
+                        RotatePacman(0);
                         break;
                     default:
                         break;
@@ -161,22 +169,47 @@ namespace PakMan
         private void AnimationTimer_Tick(object? sender, EventArgs e)
         {
             _map.isOpen = !_map.isOpen;
-            _map.ghostEU = !_map.ghostEU;
-            if (Map._player != null) // Use the type name instead of the instance reference
+            _map.gostTick = !_map.gostTick;
+            if (Map._player != null) // Check if _player is not null
             {
                 using (var ms = new MemoryStream(_map.isOpen ? Properties.Resources.PakManO : Properties.Resources.PakManC))
                 {
                     Map._player.Image = Image.FromStream(ms); // Use the type name instead of the instance reference
                 }
             }
-            if (Map._ghosts != null) // Use the type name instead of the instance reference
+            if (Map._ghosts != null) // Check if _ghosts is not null
             {
-                using (var ms = new MemoryStream(_map.isOpen ? Properties.Resources.PakManO : Properties.Resources.PakManC))
+                foreach (var ghost in Map._ghosts)
                 {
-                    Map._player.Image = Image.FromStream(ms); // Use the type name instead of the instance reference
+                    using (var ms = new MemoryStream(_map.gostTick ? Properties.Resources.GhostPNG1 : Properties.Resources.GhostPNG2))
+                    {
+                        ghost.Image = Image.FromStream(ms); // Use the type name instead of the instance reference
+                    }
                 }
             }
+        }
+        private void RotatePacman(int angle)
+        {
+            byte[] currentImageBytes = _map.isOpen ? Properties.Resources.PakManO : Properties.Resources.PakManC;
 
+            using (var ms = new MemoryStream(currentImageBytes))
+            {
+                Image currentImage = Image.FromStream(ms);
+
+                Bitmap rotatedImage = new Bitmap(currentImage.Width, currentImage.Height);
+                using (Graphics g = Graphics.FromImage(rotatedImage))
+                {
+                    g.TranslateTransform(currentImage.Width / 2, currentImage.Height / 2);
+                    g.RotateTransform(angle);
+                    g.TranslateTransform(-currentImage.Width / 2, -currentImage.Height / 2);
+                    g.DrawImage(currentImage, new Point(0, 0));
+                }
+
+                if (Map._player != null) // Check if _player is not null
+                {
+                    Map._player.Image = rotatedImage; // Use the type name instead of the instance reference
+                }
+            }
         }
 
 

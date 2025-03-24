@@ -410,12 +410,13 @@ namespace PakMan
             if (_form is MainForm mainForm)  // Cast _form to MainForm safely
             {
                 mainForm.GameOver();
-                Map._ghosts.Clear();
+                if (Map._ghosts != null)
+                {
+                    Map._ghosts.Clear();
+                }
                 mainForm.StartGame(currentLevel);  // Call function from MainForm
                 Debug.WriteLine(currentLevel);
                 UpdateScore(0);
-
-
             }
             else
             {

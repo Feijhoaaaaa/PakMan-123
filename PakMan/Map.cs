@@ -29,18 +29,21 @@ namespace PakMan
 
         //private Image[]? pakmanImg;
         public bool isOpen = false;
-        public bool ghostEU = false;
+        public bool gostTick = false;
         public Timer animationTimer;
         public string currentDirection = "right";
+
+        private Menu _menu;
 
 
 
         public Map(Form form)
         {
             _form = form;
+            
 
             // Initialize and start the animation timer
-            
+
         }
 
         
@@ -90,6 +93,8 @@ namespace PakMan
 
         public void ArrangeSprites(int value, int posXFromMatrix, int posYFromMatrix)
         {
+            if (mapMatrix == null) return;
+
             switch (value)
             {
                 case 0:
@@ -99,9 +104,14 @@ namespace PakMan
                     break;
                 case 2:
                     CreateCoin(posXFromMatrix, posYFromMatrix);
+                    IMCoinCreation();
                     break;
                 case 3:
                     CreateGhost(posXFromMatrix, posYFromMatrix);
+                    foreach (var ghost in _ghosts)
+                    {
+                        ghost.BringToFront();
+                    }
                     break;
                 case 4:
                     CreateFruits(posXFromMatrix, posYFromMatrix);
@@ -111,6 +121,27 @@ namespace PakMan
                     break;
                 default:
                     break;
+            }
+        }
+
+        private void IMCoinCreation()
+        {
+            if (Menu.currentLevel == 0)
+            {
+                for (int y = 0; y < mapMatrix.GetLength(1); y++)
+                {
+                    for (int x = 0; x < mapMatrix.GetLength(2); x++)
+                    {
+                        if (mapMatrix[currentMap, y, x] == 0)
+                        {
+                            Random rnd = new Random();
+                            if (rnd.Next(0, 2) == 1)
+                            {
+                                CreateCoin(x, y);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -143,11 +174,15 @@ namespace PakMan
         {
             PictureBox coin = new PictureBox();
             coin.Name = "Coin";
-            coin.BackColor = Color.Gold;
+            using (var ms = new MemoryStream(Properties.Resources.Coin))
+            {
+                coin.Image = Image.FromStream(ms);
+            }
             coin.Location = new Point(x * 45, y * 45);
             coin.Size = new Size(45, 45);
             coin.Visible = true;
             _form.Controls.Add(coin);
+            coin.SendToBack();
         }
 
         public void CreateWall(int x, int y)
@@ -169,7 +204,10 @@ namespace PakMan
         {
             PictureBox ghost = new PictureBox();
             ghost.Name = "Ghost";
-            ghost.Image = Image.FromFile(@"C:\Users\bohda\source\repos\PakMan\PakMan\GhostRedRight.png");
+            using (var ms = new MemoryStream(Properties.Resources.GhostPNG1))
+            {
+                ghost.Image = Image.FromStream(ms);
+            }
             ghost.SizeMode = PictureBoxSizeMode.StretchImage;
             ghost.Location = new Point(x * 45, y * 45);
             ghost.Size = new Size(45, 45);
@@ -179,6 +217,7 @@ namespace PakMan
                 _ghosts = new List<PictureBox>();
             }
             _ghosts.Add(ghost);
+            ghost.BringToFront();
             _form.Controls.Add(ghost);
         }
 
@@ -201,7 +240,10 @@ namespace PakMan
         {
             PictureBox fruit = new PictureBox();
             fruit.Name = "Fruit";
-            fruit.BackColor = Color.Pink;
+            using (var ms = new MemoryStream(Properties.Resources.Cherry))
+            {
+                fruit.Image = Image.FromStream(ms);
+            }
             fruit.Location = new Point(x * 45, y * 45);
             fruit.Size = new Size(45, 45);
             fruit.Visible = true;
